@@ -109,4 +109,3 @@ except:
 if args.verbosity >= 1:
     print "Template has been created successfully"
     
-    
