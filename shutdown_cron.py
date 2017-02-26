@@ -38,19 +38,31 @@ if __name__ == "__main__":
     PARSER = argparse.ArgumentParser(description=\
 """Small utility to shutdown linux computers if the current time is after a given time.
 Also creates a notification to inform the user that the computer will be shutdown.
-(Should be used with a root cronjob)""")
-    PARSER.add_argument("--timeout", type=int, help="Notification timeout")
-    PARSER.add_argument("--start", help="Bounding start time to shutdown the computer from")
+(Should be used with a root cronjob)""",\
+    formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    PARSER.add_argument("--timeout", type=int, help=\
+        "Notification timeout (negative number for no notification).",\
+        default=60)
+    PARSER.add_argument("--start", help="Bounding start time to shutdown the computer from",\
+        default="23:15")
     PARSER.add_argument("--end",\
-        help="Bounding end time for when the computer should be shutdown")
+        help="Bounding end time for when the computer should be shutdown",\
+        default="07:00")
+    ARGS = PARSER.parse_args()
+
+    START_TIME = ARGS.start.split(":")
+    END_TIME = ARGS.end.split(":")
+
     TIME_NOW = datetime.datetime.now()
     HOURS = TIME_NOW.hour
     MINUTES = TIME_NOW.minute
 
-    if TIME_NOW.time() < datetime.time(23, 15) and TIME_NOW.time() > datetime.time(7, 00):
+    if TIME_NOW.time() < datetime.time(int(START_TIME[0]), int(START_TIME[1])) and\
+        TIME_NOW.time() > datetime.time(int(END_TIME[0]), int(END_TIME[1])):
         exit()
 
-    syslog.syslog("Shutting down computer in 60 seconds!")
-    send_notification(60)
+    if ARGS.timeout >= 0:
+        syslog.syslog("Shutting down computer in {} seconds!".format(ARGS.timeout))
+        send_notification(ARGS.timeout)
     syslog.syslog("Exucting shutdown command now!")
     os.system("/sbin/shutdown now -h")
