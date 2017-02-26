@@ -10,6 +10,7 @@ Allow user to pass parameters from the CLI
 import datetime
 import time
 import os
+import argparse
 import syslog
 from gi.repository import Notify
 
@@ -34,6 +35,14 @@ def send_notification(warning_period):
     notification.close()
 
 if __name__ == "__main__":
+    PARSER = argparse.ArgumentParser(description=\
+"""Small utility to shutdown linux computers if the current time is after a given time.
+Also creates a notification to inform the user that the computer will be shutdown.
+(Should be used with a root cronjob)""")
+    PARSER.add_argument("--timeout", type=int, help="Notification timeout")
+    PARSER.add_argument("--start", help="Bounding start time to shutdown the computer from")
+    PARSER.add_argument("--end",\
+        help="Bounding end time for when the computer should be shutdown")
     TIME_NOW = datetime.datetime.now()
     HOURS = TIME_NOW.hour
     MINUTES = TIME_NOW.minute
