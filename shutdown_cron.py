@@ -1,3 +1,4 @@
+#! /usr/bin/python3
 """
 Simple script to check the time and issue a shutdown command if the time is between
 a given range
@@ -5,10 +6,11 @@ a given range
 TODO:
 Allow user to pass parameters from the CLI
 """
-#! /usr/bin/python3
 
 import datetime
 import time
+import os
+import syslog
 from gi.repository import Notify
 
 def send_notification(warning_period):
@@ -35,7 +37,11 @@ if __name__ == "__main__":
     TIME_NOW = datetime.datetime.now()
     HOURS = TIME_NOW.hour
     MINUTES = TIME_NOW.minute
-    send_notification(60)
 
-    if not (HOURS >= 23 and MINUTES >= 45) or (HOURS > 7 and MINUTES > 00):
+    if TIME_NOW.time() < datetime.time(23, 15) and TIME_NOW.time() > datetime.time(7, 00):
         exit()
+
+    syslog.syslog("Shutting down computer in 60 seconds!")
+    send_notification(60)
+    syslog.syslog("Exucting shutdown command now!")
+    os.system("/sbin/shutdown now -h")
